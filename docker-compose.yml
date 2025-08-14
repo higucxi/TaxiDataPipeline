@@ -1,0 +1,37 @@
+services:
+  taxi-db:
+    env_file: .env  # Load variables from .env
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - taxi-data:/var/lib/postgresql/data
+      - ./backend/config/postgresql.conf:/etc/postgresql.conf
+      - ./backend/config/pg_hba.conf:/var/lib/postgresql/pg_hba.conf
+    command: >
+      postgres -c config_file=/etc/postgresql.conf
+
+  api:
+    build: ./backend/api
+    env_file:
+      - .env
+    image: tiangolo/uvicorn-gunicorn-fastapi:python3.9
+    depends_on:
+      - taxi-db
+    ports:
+      - "${API_PORT}:8000"
+    volumes:
+      - ./backend/api:/app
+    working_dir: /app
+    command: python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    environment:
+      #- DATABASE_URL=postgresql://taxi:taxi@taxi-db:5432/taxi
+      - UVICORN_ACCESS_LOG=1
+      - UVICORN_LOG_LEVEL=debug
+
+volumes:
+  taxi-data:
