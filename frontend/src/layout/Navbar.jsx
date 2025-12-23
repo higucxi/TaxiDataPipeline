@@ -25,12 +25,6 @@ const Navbar = ({ setActiveChart, activeChart }) => {
         >
           Premium Trips
         </li>
-        <li
-          className={activeChart === "tripsByPassenger" ? "active" : ""}
-          onClick={() => setActiveChart("tripsByPassenger")}
-        >
-          Trips by Passenger Count
-        </li>
       </ul>
     </nav>
   );
